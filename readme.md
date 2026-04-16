@@ -56,7 +56,7 @@ Model: LSTM / Deep Learning (Keras)
 
 Make sure you have:
 
-Python-3.12.10
+Python-3.11.8
 Flask
 tensorflow-2.19.0
 keras-3.13.2
