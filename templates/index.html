@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Sentiment Analyzer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.4s;
+}
+
+/* DARK MODE */
+body.dark {
+    background: linear-gradient(135deg, #1e1e2f, #2a2a72);
+    color: white;
+}
+
+/* LIGHT MODE */
+body.light {
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    color: #222;
+}
+
+.card {
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 30px;
+    width: 450px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+    background: rgba(255,255,255,0.1);
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    border-radius: 12px;
+    border: none;
+    padding: 12px;
+    margin-top: 10px;
+    resize: none;
+    outline: none;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    cursor: pointer;
+}
+
+.result {
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.bar {
+    height: 10px;
+    border-radius: 10px;
+    background: #ccc;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    width: 0%;
+    transition: 0.5s;
+}
+
+.toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+
+/* HISTORY DROPDOWN */
+.history-container {
+    margin-top: 15px;
+    text-align: left;
+}
+
+.history-header {
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.1);
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.history-header:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.history-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    margin-top: 5px;
+    padding-left: 5px;
+    font-size: 13px;
+}
+
+.history-item {
+    padding: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+</style>
+</head>
+
+<body class="dark">
+
+<div class="toggle" onclick="toggleMode()">🌙</div>
+
+<div class="card">
+    <h2>🤖 Sentiment Analyzer</h2>
+
+    <textarea id="text" placeholder="Type or speak..."></textarea>
+
+    <button onclick="predict()">Analyze</button>
+    <button onclick="startVoice()">🎤 Speak</button>
+
+    <div class="result" id="result"></div>
+
+    <div class="bar">
+        <div class="fill" id="bar"></div>
+    </div>
+
+    <canvas id="chart" height="120"></canvas>
+
+    <!-- DROPDOWN HISTORY -->
+    <div class="history-container">
+        <div class="history-header" onclick="toggleHistory()">
+            📜 View History ▼
+        </div>
+        <div class="history-content" id="historyBox"></div>
+    </div>
+</div>
+
+<script>
+// 🌙 Dark Mode Toggle
+function toggleMode() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+}
+
+// 🎤 Voice Input
+function startVoice() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+        document.getElementById("text").value = text;
+        predict();
+    };
+
+    recognition.onerror = function() {
+        alert("Voice recognition failed");
+    };
+}
+
+// 📈 Chart
+let historyScores = [];
+
+const ctx = document.getElementById('chart').getContext('2d');
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Sentiment Score',
+            data: [],
+            borderWidth: 2,
+            tension: 0.3
+        }]
+    }
+});
+
+function updateChart(score) {
+    historyScores.push(score);
+    chart.data.labels.push("Input " + historyScores.length);
+    chart.data.datasets[0].data.push(score);
+    chart.update();
+}
+
+// 📜 Toggle Dropdown
+function toggleHistory() {
+    const box = document.getElementById("historyBox");
+
+    if (box.style.maxHeight) {
+        box.style.maxHeight = null;
+    } else {
+        box.style.maxHeight = box.scrollHeight + "px";
+    }
+}
+
+// 💾 Load History
+async function loadHistory() {
+    const res = await fetch('/history');
+    const data = await res.json();
+
+    let html = "";
+
+    data.slice().reverse().forEach(item => {
+        html += `
+            <div class="history-item">
+                <b>${item.label}</b> (${(item.score*100).toFixed(1)}%)<br>
+                <small>${item.text}</small>
+            </div>
+        `;
+    });
+
+    document.getElementById("historyBox").innerHTML = html;
+}
+
+// ⚡ Prediction
+async function predict() {
+    const text = document.getElementById("text").value;
+
+    const res = await fetch("/predict", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({text: text})
+    });
+
+    const data = await res.json();
+
+    const result = document.getElementById("result");
+    const bar = document.getElementById("bar");
+
+    let emoji = "😐";
+    if (data.score > 0.7) emoji = "😍";
+    else if (data.score > 0.5) emoji = "😊";
+    else if (data.score > 0.3) emoji = "😕";
+    else emoji = "😡";
+
+    result.innerText = `${data.label} ${emoji} (${(data.score*100).toFixed(2)}%)`;
+
+    bar.style.width = (data.score * 100) + "%";
+    bar.style.background = data.score > 0.5 ? "#00ffae" : "#ff4d4d";
+
+    updateChart(data.score);
+    loadHistory();
+}
+</script>
+
+</body>
+</html>
