@@ -46,6 +46,9 @@ pip install -r requirements.txt
 4. Run the application
 python app.py
 
+5. Deployed-- Check out
+https://sentiment-app-production-093f.up.railway.app/
+
 📊 Model Details
 Input: Movie review text
 Output: Positive / Negative sentiment
