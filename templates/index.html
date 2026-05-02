@@ -7,162 +7,66 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-
-body {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: 0.4s;
-}
-
-/* DARK MODE */
-body.dark {
-    background: linear-gradient(135deg, #1e1e2f, #2a2a72);
-    color: white;
-}
-
-/* LIGHT MODE */
-body.light {
-    background: linear-gradient(135deg, #e0eafc, #cfdef3);
-    color: #222;
-}
-
-.card {
-    backdrop-filter: blur(15px);
-    border-radius: 20px;
-    padding: 30px;
-    width: 450px;
-    text-align: center;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.3);
-    background: rgba(255,255,255,0.1);
-}
-
-textarea {
-    width: 100%;
-    height: 100px;
-    border-radius: 12px;
-    border: none;
-    padding: 12px;
-    margin-top: 10px;
-    resize: none;
-    outline: none;
-}
-
-button {
-    margin-top: 10px;
-    padding: 10px;
-    width: 100%;
-    border-radius: 12px;
-    border: none;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    cursor: pointer;
-}
-
-.result {
-    margin-top: 15px;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.bar {
-    height: 10px;
-    border-radius: 10px;
-    background: #ccc;
-    margin-top: 10px;
-    overflow: hidden;
-}
-
-.fill {
-    height: 100%;
-    width: 0%;
-    transition: 0.5s;
-}
-
-.toggle {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    cursor: pointer;
-}
-
-/* HISTORY DROPDOWN */
-.history-container {
-    margin-top: 15px;
-    text-align: left;
-}
-
-.history-header {
-    padding: 10px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.1);
-    cursor: pointer;
-    font-size: 14px;
-    transition: 0.3s;
-}
-
-.history-header:hover {
-    background: rgba(255,255,255,0.2);
-}
-
-.history-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease;
-    margin-top: 5px;
-    padding-left: 5px;
-    font-size: 13px;
-}
-
-.history-item {
-    padding: 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-</style>
+<link rel="stylesheet" href="../static/style.css">
 </head>
 
 <body class="dark">
-
-<div class="toggle" onclick="toggleMode()">🌙</div>
-
-<div class="card">
-    <h2>🤖 Sentiment Analyzer</h2>
-
-    <textarea id="text" placeholder="Type or speak..."></textarea>
-
-    <button onclick="predict()">Analyze</button>
-    <button onclick="startVoice()">🎤 Speak</button>
-
-    <div class="result" id="result"></div>
-
-    <div class="bar">
-        <div class="fill" id="bar"></div>
+<header>
+    <div class="toggle" onclick="toggleMode()">🌙</div>
+    <div class="hd-intro">
+        <h1>Movie Reviews Analyzer</h1>
+        <p>🤔 Thinking of what to watch next!</p>
+        <p>😒 Bored of reading the long reviews...</p>
+        <p>😊 Now, What to watch can be decided in just one click using this movie review sentiment analyszer </p>
     </div>
+</header>
+<main>
+    <figure>
+        <img class="img" src="../static/comedy-movie-review-video-templates.webp" alt="">
+    </figure>
+    <section>
 
-    <canvas id="chart" height="120"></canvas>
-
-    <!-- DROPDOWN HISTORY -->
-    <div class="history-container">
-        <div class="history-header" onclick="toggleHistory()">
-            📜 View History ▼
+        <div class="card">
+        
+            <textarea id="text" placeholder="Type or speak..."></textarea>
+        
+            <button onclick="predict()">Analyze</button>
+            <button onclick="startVoice()">🎤 Speak</button>
+        
+            <div class="result" id="result"></div>
+        
+            <div class="bar">
+                <div class="fill" id="bar"></div>
+            </div>
+        
+            <canvas id="chart" height="120"></canvas>
+        
+            <!-- DROPDOWN HISTORY -->
+            <div class="history-container">
+                <div class="history-header" onclick="toggleHistory()">
+                    📜 View History ▼
+                </div>
+                <div class="history-content" id="historyBox"></div>
+            </div>
         </div>
-        <div class="history-content" id="historyBox"></div>
-    </div>
-</div>
+    </section>
+</main>
+<footer>
+    <section>
+        <span>🤔</span>
+        <span>😊</span>
+        <span>😂</span>
+        <span>😉</span>
+    </section>
+</footer>
 
 <script>
 // 🌙 Dark Mode Toggle
 function toggleMode() {
     document.body.classList.toggle("dark");
     document.body.classList.toggle("light");
+    let el = document.querySelector(".img");
+    el.classList.toggle("img-light");
 }
 
 // 🎤 Voice Input
