@@ -128,16 +128,16 @@ main > section {
     backdrop-filter: blur(8px);
     border-radius: 20px;
     padding: 30px;
-    min-width: 450px;
-    min-height: min(90%,450px);
+    width: 600px;
+    min-height: 650px;
     text-align: center;
     box-shadow: 0 15px 40px rgba(0,0,0,0.3);
     background: transparent;
-    transition: all 0.5s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 .card:hover{
-    transform: scale3d(1.2,1.2, 1.7);
+    transform: scale3d(1.06,1.06, 1.06);
 }
 
 
