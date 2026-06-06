@@ -47,7 +47,7 @@ pip install -r requirements.txt
 python app.py
 
 5. Deployed-- Check out
-https://sentiment-app-production-093f.up.railway.app/
+https://huggingface.co/spaces/Ykode/movie-sentiment-analysis
 
 📊 Model Details
 Input: Movie review text
